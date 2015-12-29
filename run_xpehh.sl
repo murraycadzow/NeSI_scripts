@@ -33,9 +33,11 @@ srun python /home/murray.cadzow/uoo00008/MerrimanSelectionPipeline/selection_pip
 --output ${POP1}${i}_selscan
 
 #need selscan file for POP2 (1KGP pops)
-srun tar -C $TMP_DIR -xzf ~/uoo00008/selscan_in/${POP2}_in_selscan.tar.gz ${POP2}/${POP2}${i}_selscan.selscanhaps
+srun tar -C $TMP_DIR -xzf ~/uoo00008/selscan_in/${POP2}_in_selscan.tar.gz ${POP2}/${POP2}${i}_selscan.selscanhaps ${POP2}/${POP2}${i}_selscan.selscanmap
 #merge selscan files
-srun python /home/murray.cadzow/uoo00008/MerrimanSelectionPipeline/selection_pipeline/selscan_to_selscan_xpehh.py \
+mkdir $TMP_DIR/${POP1}_${POP2}
+
+cd $TMP_DIR/${POP1}_${POP2} && srun python /home/murray.cadzow/uoo00008/MerrimanSelectionPipeline/selection_pipeline/selscan_to_selscan_xpehh.py \
 --pop1-prefix $TMP_DIR/${POP1}${i}_selscan \
 --pop1-name ${POP1} \
 --pop2-prefix $TMP_DIR/${POP2}/${POP2}${i}_selscan \
@@ -43,7 +45,16 @@ srun python /home/murray.cadzow/uoo00008/MerrimanSelectionPipeline/selection_pip
 -c ${i} \
 --out ./
 
-srun tar -C $TMP_DIR -xzf ${POP1}_${POP2}.tar.gz ${POP1}_${POP2}/*${i}.xpehh* ${POP1}_${POP2}/*${i}.*.xp*
-cd $TMP_DIR && srun ~/uoo00008/selscan/src/selscan --xpehh --hap ${POP1}_${POP2}/${POP1}_${i}.matches_${POP2}.xpehh_selscanhaps --map  ${POP1}_${POP2}/${POP1}_${POP2}_${i}.xpehh_selscanmap --ref ${POP1}_${POP2}/${POP2}_${i}.matches_${POP1}.xp_ehh_selscanhaps  --threads 16 --out ${TMP_DIR}/${POP1}_${POP2}_${i}
-srun tar -czf ${POP1}_${POP2}_chr${i}_xpehh.tar.gz *log *.out ${POP1}_${POP2}_${i}* ${POP1}${i}_selscan*
+ls $TMP_DIR/*
+
+#srun tar -C $TMP_DIR -xzf ${POP1}_${POP2}.tar.gz ${POP1}_${POP2}/*${i}.xpehh* ${POP1}_${POP2}/*${i}.*.xp*
+cd $TMP_DIR && srun ~/uoo00008/selscan/src/selscan \
+--xpehh \
+--hap ${POP1}_${POP2}/${POP1}_${i}.matches_${POP2}.xpehh_selscanhaps \
+--map  ${POP1}_${POP2}/${POP1}_${POP2}_${i}.xpehh_selscanmap \
+--ref ${POP1}_${POP2}/${POP2}_${i}.matches_${POP1}.xp_ehh_selscanhaps  \
+--threads 16 \
+--out ${TMP_DIR}/${POP1}_${POP2}_${i}
+
+srun tar -czf ${POP1}_${POP2}_chr${i}_xpehh.tar.gz *log *.out ${POP1}_${POP2}/ ${POP1}${i}_selscan*
 srun cp ${POP1}_${POP2}_chr${i}_xpehh.tar.gz $DIR
